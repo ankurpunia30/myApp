@@ -1,0 +1,109 @@
+#!/usr/bin/env python3
+import sys
+import uuid
+import time
+import json
+import os
+
+DATA_FILE = "data.json"
+
+def add(item: str):
+    todo = {
+        "id": str(uuid.uuid4()),
+        "description": item,
+        "status": "todo",
+        "created_at": time.time(),
+        "updated_at": time.time()
+    }
+
+    data = []
+
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, "r") as f:
+            try:
+                data = json.load(f)
+            except json.JSONDecodeError:
+                pass
+
+    data.append(todo)
+
+    with open(DATA_FILE, "w") as f:
+        json.dump(data, f, indent=4)
+
+    print("Task added")
+
+
+def delete(task_id: str):
+    if not os.path.exists(DATA_FILE):
+        print("No tasks found")
+        return
+
+    with open(DATA_FILE, "r") as f:
+        data = json.load(f)
+
+    new_data = [task for task in data if task["id"] != task_id]
+
+    with open(DATA_FILE, "w") as f:
+        json.dump(new_data, f, indent=4)
+
+    print(" Task deleted")
+
+
+def update(task_id: str, value: str):
+    if not os.path.exists(DATA_FILE):
+        print("No tasks found")
+        return
+
+    with open(DATA_FILE, "r") as f:
+        data = json.load(f)
+
+    for task in data:
+        if task["id"] == task_id:
+            task["description"] = value
+            task["updated_at"] = time.time()
+
+    with open(DATA_FILE, "w") as f:
+        json.dump(data, f, indent=4)
+
+    print("✏️ Task updated")
+
+
+def list_all(status="all"):
+    if not os.path.exists(DATA_FILE):
+        print("No tasks found")
+        return
+
+    with open(DATA_FILE, "r") as f:
+        data = json.load(f)
+
+    for task in data:
+        if status == "all" or task["status"] == status:
+            print(f"{task['id']} | {task['status']} | {task['description']}")
+
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: task-cli <command>")
+        return
+
+    command = sys.argv[1]
+
+    if command == "add":
+        add(" ".join(sys.argv[2:]))
+
+    elif command == "delete":
+        delete(sys.argv[2])
+
+    elif command == "update":
+        update(sys.argv[2], " ".join(sys.argv[3:]))
+
+    elif command == "list":
+        status = sys.argv[2] if len(sys.argv) > 2 else "all"
+        list_all(status)
+
+    else:
+        print("Unknown command")
+
+
+if __name__ == "__main__":
+    main()
