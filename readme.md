@@ -4,7 +4,8 @@
 A command-line task management tool built using Python.
 
 ## Project URL
-https://github.com/ankurpunia30/task-cli
+
+https://roadmap.sh/projects/task-tracker
 
 ## How to Run
 
